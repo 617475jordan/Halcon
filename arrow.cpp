@@ -32,6 +32,7 @@ void drawArrow(cv::Mat& img, cv::Point pStart, cv::Point pEnd, int len, int alph
 	//计算 θ 角（最简单的一种情况在下面图示中已经展示，关键在于 atan2 函数，详情见下面）   
 	double angle = atan2((double)(pStart.y - pEnd.y), (double)(pStart.x - pEnd.x));
 
+	//在halcon 中 angle =Pi/2-angle; cos(PI*3/2-x)
 	line(img, pStart, pEnd, color, thickness, lineType);
 
 	//计算箭角边的另一端的端点位置（上面的还是下面的要看箭头的指向，也就是pStart和pEnd的位置） 

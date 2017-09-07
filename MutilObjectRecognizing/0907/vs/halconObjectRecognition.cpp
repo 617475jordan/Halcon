@@ -1,4 +1,4 @@
-ï»¿#include "halconObjectRecognition.h"
+#include "halconObjectRecognition.h"
 
 
 halconObjectRecognition::halconObjectRecognition()
@@ -12,20 +12,20 @@ halconObjectRecognition::~halconObjectRecognition()
 
 void halconObjectRecognition::initialize()
 {
-	SetSystem("width", 480);
-	SetSystem("height", 640);
+	SetSystem("width", 960);
+	SetSystem("height", 540);
 
-	//hv_vecHtRow.push_back(60);
-	//hv_vecHtColumn.push_back(180);
-	//hv_vecHtWidth.push_back(620);
-	//hv_vecHtHeight.push_back(320);
+	/*hv_vecHtRow.push_back(60);
+	hv_vecHtColumn.push_back(180);
+	hv_vecHtWidth.push_back(620);
+	hv_vecHtHeight.push_back(320);
 
 
-	//for (int j = 0; j < m_iModelImgNum; j++)
-	//{
-	//	sprintf(m_charfileName, m_strSrc, j + 1);
-	//	setUpModel(m_charfileName, j);
-	//}
+	for (int j = 0; j < m_iModelImgNum; j++)
+	{
+		sprintf(m_charfileName, m_strSrc, j + 1);
+		setUpModel(m_charfileName, j);
+	}*/
 	if (HDevWindowStack::IsOpen())
 		ClearWindow(HDevWindowStack::GetActive());
 }
@@ -37,15 +37,15 @@ void halconObjectRecognition::run(HObject ho_SearchImage)
 	}
 	/*sprintf(m_charfileName, m_strDst);
 	OpenFramegrabber("File", 1, 1, 0, 0, 0, 0, "default", -1, "default", -1, "default",
-	"..\\caliper\\test9\\src\\1.jpg", "default", -1, 1, &hv_FGHandle);
+		"..\\caliper\\test9\\src\\1.jpg", "default", -1, 1, &hv_FGHandle);
 	GrabImage(&ho_SearchImage, hv_FGHandle);*/
 	if (HDevWindowStack::IsOpen())
 		DispObj(ho_SearchImage, HDevWindowStack::GetActive());
 
-
+	
 	for (int j = 0; j < hv_vecHtRow.size(); ++j)
 	{
-
+		char m_charOut[100];
 		FindShapeModel(ho_SearchImage, hv_vecModelID[j], 0, HTuple(360).TupleRad(), m_dMinScore, 0,
 			m_dMaxOverLap, "least_squares", 0, 0., &hv_RowCheck, &hv_ColumnCheck, &hv_AngleCheck,
 			&hv_Score);
@@ -62,28 +62,28 @@ void halconObjectRecognition::run(HObject ho_SearchImage)
 				if (HDevWindowStack::IsOpen())
 				DispObj(ho_ModelAtNewPosition, HDevWindowStack::GetActive());
 				if (HDevWindowStack::IsOpen())
-				SetColor(HDevWindowStack::GetActive(), "blue");*/
+					SetColor(HDevWindowStack::GetActive(), "blue");*/
 				AffineTransPixel(hv_MovementOfObject, -120, 0, &hv_RowArrowHead, &hv_ColumnArrowHead);
 				DispArrow(hv_WindowHandle, HTuple(hv_RowCheck[hv_j]), HTuple(hv_ColumnCheck[hv_j]),
 					hv_RowArrowHead, hv_ColumnArrowHead, 2);
-				/*if (HDevWindowStack::IsOpen())
-				disp_message(hv_WindowHandle, "Matching: Time", "image", 50, 50, "white", "false");*/
-				//disp_message(hv_WindowHandle, "Hello World!", "image", 10, 10, "blue", "false");
+				sprintf(m_charOut, "(%.1f,%.1f,%.1f)", hv_RowCheck[0].D(), hv_vecHtColumn[0].D(), hv_AngleCheck[0].D() * 180 / PI);
+				/*if (HDevWindowStack::IsOpen())  */
+				disp_message(hv_WindowHandle, m_charOut, "image", hv_RowCheck[0].D(), hv_ColumnCheck[0].D(), "red", "false");
 			}
 		}
-
+		
 		if (hv_Score.Length() > 0)
 		{
 			cout << "The current ID is :" << j << endl;
-			cout << "The current Coordinate is:(" << hv_RowCheck[0].D() << "," << hv_vecHtColumn[0].D() << ")" << endl;
+			cout << "The current Coordinate is:(" << hv_RowCheck[0].D() << "," << hv_ColumnCheck[0].D() << ")" << endl;
 			cout << "The angle is:" << hv_AngleCheck[0].D() * 180 / PI << endl;
 			cout << "The similiarity value is :" << hv_Score[0].D() << endl;
-			char m_charOut[100];
-			sprintf(m_charOut, "(%f,%f)", hv_RowCheck[0].D(), hv_vecHtColumn[0].D());
+			
+			
 			double m_dCurrent_Y = hv_RowCheck[0].D();
 			double m_dCurrent_X = hv_vecHtColumn[0].D();
-
-
+			
+			
 		}
 		//disp_continue_message(hv_WindowHandle, "black", "true");
 		//	Sleep(2000);
@@ -95,7 +95,7 @@ void halconObjectRecognition::run(HObject ho_SearchImage)
 	}
 	// stop(...); only in hdevelop
 
-	//ClearShapeModel(hv_ModelID);   //Ã—Ã®ÂºÃ³Â´Â¦Ã€Ã­
+	//ClearShapeModel(hv_ModelID);   //×îºó´¦Àí
 	//CloseWindow(hv_WindowHandle);
 
 }
@@ -371,7 +371,7 @@ void halconObjectRecognition::disp_continue_message(HTuple hv_WindowHandle, HTup
 	//Display the message.
 	/*hv_ContinueMessage = "Press Run (F5) to continue";
 	DispText(hv_WindowHandle, hv_ContinueMessage, "window", "bottom", "right", hv_Color,
-	hv_GenParamName, hv_GenParamValue);*/
+		hv_GenParamName, hv_GenParamValue);*/
 	return;
 }
 
@@ -429,15 +429,15 @@ void halconObjectRecognition::disp_message(HTuple hv_WindowHandle, HTuple hv_Str
 	//
 	//
 	//Convert the parameters for disp_text.
-	if (0 != (HTuple(hv_Row == HTuple()).TupleOr(hv_Column == HTuple())))
+	if (0 != (HTuple(hv_Row==HTuple()).TupleOr(hv_Column==HTuple())))
 	{
 		return;
 	}
-	if (0 != (hv_Row == -1))
+	if (0 != (hv_Row==-1))
 	{
 		hv_Row = 12;
 	}
-	if (0 != (hv_Column == -1))
+	if (0 != (hv_Column==-1))
 	{
 		hv_Column = 12;
 	}
@@ -447,13 +447,13 @@ void halconObjectRecognition::disp_message(HTuple hv_WindowHandle, HTuple hv_Str
 	hv_GenParamValue = HTuple();
 	if (0 != ((hv_Box.TupleLength())>0))
 	{
-		if (0 != (HTuple(hv_Box[0]) == HTuple("false")))
+		if (0 != (HTuple(hv_Box[0])==HTuple("false")))
 		{
 			//Display no box
 			hv_GenParamName = hv_GenParamName.TupleConcat("box");
 			hv_GenParamValue = hv_GenParamValue.TupleConcat("false");
 		}
-		else if (0 != (HTuple(hv_Box[0]) != HTuple("true")))
+		else if (0 != (HTuple(hv_Box[0])!=HTuple("true")))
 		{
 			//Set a color other than the default.
 			hv_GenParamName = hv_GenParamName.TupleConcat("box_color");
@@ -462,13 +462,13 @@ void halconObjectRecognition::disp_message(HTuple hv_WindowHandle, HTuple hv_Str
 	}
 	if (0 != ((hv_Box.TupleLength())>1))
 	{
-		if (0 != (HTuple(hv_Box[1]) == HTuple("false")))
+		if (0 != (HTuple(hv_Box[1])==HTuple("false")))
 		{
 			//Display no shadow.
 			hv_GenParamName = hv_GenParamName.TupleConcat("shadow");
 			hv_GenParamValue = hv_GenParamValue.TupleConcat("false");
 		}
-		else if (0 != (HTuple(hv_Box[1]) != HTuple("true")))
+		else if (0 != (HTuple(hv_Box[1])!=HTuple("true")))
 		{
 			//Set a shadow color other than the default.
 			hv_GenParamName = hv_GenParamName.TupleConcat("shadow_color");

@@ -1,5 +1,10 @@
+#include <halcon_all.h>
+#include <opencv_all.h>
 #include "halconObjectRecognition.h"
+#include "myKinect.h"
+#include "remapImage.h"
 #include "matHalcon.h"
+#include "ImageEnhancement.h"
 Mat m_matImg, m_matROIImg, m_matTmpImg, m_matDstImg;
 Mat roi;//ROI图像
 
@@ -20,7 +25,7 @@ int m_iCurrentImgNum = 1;
 void initialize();
 void onMouse(int event, int x, int y, int flags, void *param);
 
-const Size m_size = Size(480, 640);
+//const Size m_size = Size(512,424);
 int main(int argc, char *argv[])
 {
 #if defined(_WIN32)
@@ -28,36 +33,81 @@ int main(int argc, char *argv[])
 #elif defined(__linux__)
 	XInitThreads();
 #endif
-
+	
 	objectRecognition.initialize();
+	
+	//Sleep(2000);
+	CBodyBasics myKinect;
+	remapImage 	remapImage;
 	matHalcon  matHalcon;
+	//HRESULT hr = myKinect.colorInitializeDefaultSensor();
+	//while (FAILED(hr))
+	//{
+	//	hr = myKinect.colorInitializeDefaultSensor();
+	//}
+	//namedWindow(windowsName);
+	//setMouseCallback(windowsName, onMouse);
+	//if (SUCCEEDED(hr))
+	//{
+
+	//	while (1)
+	//	{
+	//		int m_iTime = clock();
+	//		m_matImg = myKinect.colorUpdate();
+	//		if (m_matImg.empty())
+	//		{
+	//			m_matImg = myKinect.colorUpdate();
+	//		}
+	//		else
+	//		{
+	//			cvtColor(m_matImg, m_matImg, CV_RGB2GRAY);
+	//			cvtColor(m_matImg, m_matImg, CV_GRAY2RGB);
+	//			m_matTmpImg = Mat::zeros(m_matImg.rows, m_matImg.cols, m_matImg.type());
+	//			m_matImg = remapImage.Photo_Remap(m_matImg);
+	//			cout << m_matImg.cols << "" << m_matImg.rows << endl;
+	//			//resize(m_matImg, m_matImg, m_size);				
+	//			objectRecognition.run(matHalcon.IplImageToHImage(m_matImg));
+	//			imshow(windowsName, m_matImg);
+	//			waitKey(50);
+	//		}
+	//		cout << "The total time is :" << clock() - m_iTime << endl;
+	//	}
+	//}
 	capture.open(0);
 	if (!capture.isOpened())
 	{
 		return -1;
 	}
-	namedWindow(windowsName);
-	setMouseCallback(windowsName, onMouse);
-	while (1)
+	else
 	{
-		capture >> m_matImg;
-		int m_iTime = clock();
-		if (m_matImg.empty())
+		namedWindow(windowsName);
+		setMouseCallback(windowsName, onMouse);
+		imageEnhancement ImageEnhancement;
+		while (1)
 		{
-			return -1;
+			int m_iTime = clock();
+			capture >> m_matImg;
+			if (m_matImg.empty())
+			{
+				return -1;
+			}
+			else
+			{
+				flip(m_matImg, m_matImg, -1);
+				GaussianBlur(m_matImg, m_matImg, Size(3, 3), 0);
+				GaussianBlur(m_matImg, m_matImg, Size(3, 3), 0);
+				cvtColor(m_matImg, m_matImg, CV_RGB2GRAY);
+				cvtColor(m_matImg, m_matImg, CV_GRAY2RGB);
+				m_matImg=ImageEnhancement.SimplestCB(m_matImg, 1);
+				m_matTmpImg = Mat::zeros(m_matImg.rows, m_matImg.cols, m_matImg.type());
+				//resize(m_matImg, m_matImg, m_size);				
+				objectRecognition.run(matHalcon.IplImageToHImage(m_matImg));
+				imshow(windowsName, m_matImg);
+				waitKey(1);
+			}
+			cout << "The total time is :" << clock() - m_iTime << endl;
 		}
-		else
-		{
-			//cvtColor(m_matImg, m_matImg, CV_RGB2GRAY);
-			//cvtColor(m_matImg, m_matImg, CV_GRAY2RGB);
-			m_matTmpImg = Mat::zeros(m_matImg.rows, m_matImg.cols, m_matImg.type());
-			resize(m_matImg, m_matImg, m_size);
-			imwrite(m_strDstImg, m_matImg);
-			objectRecognition.run(matHalcon.IplImageToHImage(m_matImg));
-			imshow(windowsName, m_matImg);
-			waitKey(1);
-		}
-		cout << "The total time is :" << clock() - m_iTime<<"ms" << endl;
+
 	}
 	return 0;
 }
@@ -101,7 +151,7 @@ void onMouse(int event, int x, int y, int flags, void *param)
 			sprintf(m_charCurrrentPosition, "(%d,%d)", x, y);
 			putText(m_matImg, m_charCurrrentPosition, Point(x, y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 0, 255));//只是实时显示鼠标移动的坐标 
 			imshow(windowsName, m_matImg);
-
+			
 		}
 
 	}
@@ -124,7 +174,7 @@ void onMouse(int event, int x, int y, int flags, void *param)
 		if (m_icurrentRoi_Width > 0 && m_icurrentRoi_Height > 0 && m_icurrentRoi_Width*m_icurrentRoi_Height > 100)
 		{
 			roi = m_matCurrentImg(Rect(m_icurrentRoi_X, m_icurrentRoi_Y, m_icurrentRoi_Width, m_icurrentRoi_Height));
-
+			
 			/*namedWindow("SignROI", WINDOW_AUTOSIZE);
 			imshow("SignROI", roi);
 			waitKey(1);*/
@@ -133,9 +183,11 @@ void onMouse(int event, int x, int y, int flags, void *param)
 			imwrite(m_charDstImg, m_matCurrentImg);
 			objectRecognition.upDateNewData(m_charDstImg, m_icurrentRoi_X, m_icurrentRoi_Y, m_icurrentRoi_Width, m_icurrentRoi_Height);
 			m_iCurrentImgNum++;
-
+			
 		}
 
 		m_bDrawing = false;
 	}
 }
+
+

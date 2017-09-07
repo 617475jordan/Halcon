@@ -1,4 +1,4 @@
-﻿#include "matHalcon.h"
+#include "matHalcon.h"
 
 
 matHalcon::matHalcon()
@@ -18,7 +18,7 @@ Mat matHalcon::HImageToIplImage(HObject &Hobj)
 	HTuple htChannels;
 	HTuple     width, height;
 	width = height = 0;
-	//×ª»»Í¼Ïñ¸ñÊ½    
+	//ת��ͼ���ʽ    
 	ConvertImageType(Hobj, &Hobj, "byte");
 	CountChannels(Hobj, &htChannels);
 	HTuple cType;
